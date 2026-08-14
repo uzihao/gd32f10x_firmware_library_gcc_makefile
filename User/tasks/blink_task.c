@@ -23,15 +23,6 @@ BaseType_t blink_task_create(void)
     return xTaskCreate(blink_task, "blink", configMINIMAL_STACK_SIZE, NULL,
                        tskIDLE_PRIORITY + 1U, NULL);
 }
-
-void vApplicationStackOverflowHook(TaskHandle_t task, char *task_name)
-{
-    (void)task;
-    (void)task_name;
-    taskDISABLE_INTERRUPTS();
-    while (1) {
-    }
-}
 #else
 #include "systick.h"
 

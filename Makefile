@@ -62,6 +62,7 @@ User/main.c
 
 ifeq ($(FREERTOS_ENABLED),1)
 C_SOURCES += \
+User/app/freertos_hooks.c \
 Utilities/Third_Party/FreeRTOS-Kernel/tasks.c \
 Utilities/Third_Party/FreeRTOS-Kernel/queue.c \
 Utilities/Third_Party/FreeRTOS-Kernel/list.c \

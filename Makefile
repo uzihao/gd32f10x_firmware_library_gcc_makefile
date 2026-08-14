@@ -2,7 +2,7 @@
 # target
 ######################################
 # do NOT leave space at the end of line
-TARGET = gd32f103cbt6
+TARGET = gd32f103rct6
 
 
 ######################################
@@ -56,7 +56,7 @@ User/main.c
 
 # ASM sources
 ASM_SOURCES =  \
-Firmware/CMSIS/GD/GD32F10x/Source/GCC/startup_gd32f10x_md.S \
+Firmware/CMSIS/GD/GD32F10x/Source/GCC/startup_gd32f10x_hd.S \
 
 
 
@@ -84,7 +84,7 @@ BIN = $(CP) -O binary -S
 # CFLAGS
 #######################################
 # cpu
-CPU = -mcpu=cortex-m4
+CPU = -mcpu=cortex-m3
 
 # fpu
 # NONE for Cortex-M0/M0+/M3
@@ -102,7 +102,7 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DUSE_STDPERIPH_DRIVER \
--DGD32F10X_MD
+-DGD32F10X_HD
 
 
 # AS includes

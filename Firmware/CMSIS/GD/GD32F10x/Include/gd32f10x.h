@@ -311,7 +311,13 @@ typedef enum IRQn
 
 /* enum definitions */
 typedef enum {DISABLE = 0, ENABLE = !DISABLE} EventStatus, ControlStatus;
+#if !defined(__cplusplus) && \
+    (!defined(__STDC_VERSION__) || (__STDC_VERSION__ < 202311L)) && \
+    !defined(bool)
 typedef enum {FALSE = 0, TRUE = !FALSE} bool;
+#else
+enum {FALSE = 0, TRUE = !FALSE};
+#endif
 typedef enum {RESET = 0, SET = !RESET} FlagStatus;
 typedef enum {ERROR = 0, SUCCESS = !ERROR} ErrStatus;
 

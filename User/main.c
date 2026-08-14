@@ -36,6 +36,42 @@ OF SUCH DAMAGE.
 #include "systick.h"
 #include <stdio.h>
 
+#define DEBUG_USART            USART0
+#define DEBUG_USART_GPIO       GPIOA
+#define DEBUG_USART_TX_PIN     GPIO_PIN_9
+
+static void debug_usart_init(void)
+{
+    rcu_periph_clock_enable(RCU_GPIOA);
+    rcu_periph_clock_enable(RCU_USART0);
+
+    /* USART0 TX is PA9. RX is not required for this print-only example. */
+    gpio_init(DEBUG_USART_GPIO, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ,
+              DEBUG_USART_TX_PIN);
+
+    usart_deinit(DEBUG_USART);
+    usart_baudrate_set(DEBUG_USART, 115200U);
+    usart_word_length_set(DEBUG_USART, USART_WL_8BIT);
+    usart_stop_bit_set(DEBUG_USART, USART_STB_1BIT);
+    usart_parity_config(DEBUG_USART, USART_PM_NONE);
+    usart_transmit_config(DEBUG_USART, USART_TRANSMIT_ENABLE);
+    usart_enable(DEBUG_USART);
+}
+
+/* Redirect printf() output to USART0 (PA9). */
+int _write(int file, char *ptr, int len)
+{
+    int index;
+
+    (void)file;
+    for(index = 0; index < len; index++) {
+        usart_data_transmit(DEBUG_USART, (uint8_t)ptr[index]);
+        while(RESET == usart_flag_get(DEBUG_USART, USART_FLAG_TBE)) {
+        }
+    }
+    return len;
+}
+
 /*!
     \brief      main function
     \param[in]  none
@@ -45,16 +81,20 @@ OF SUCH DAMAGE.
 int main(void)
 {
     systick_config();
+    debug_usart_init();
+    printf("GD32F103 booted: USART0 PA9, 115200 8N1\r\n");
+
     /* enable the LED clock */
-    rcu_periph_clock_enable(RCU_GPIOB);
+    rcu_periph_clock_enable(RCU_GPIOA);
     /* configure LED GPIO port */
-    gpio_init(GPIOB, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_2);
-    gpio_bit_reset(GPIOB, GPIO_PIN_2);
+    gpio_init(GPIOA, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
+    gpio_bit_reset(GPIOA, GPIO_PIN_0);
 
     while(1){
-        gpio_bit_set(GPIOB, GPIO_PIN_2);
+        gpio_bit_set(GPIOA, GPIO_PIN_0);
+        printf("heartbeat\r\n");
         delay_1ms(1000);
-        gpio_bit_reset(GPIOB, GPIO_PIN_2);
+        gpio_bit_reset(GPIOA, GPIO_PIN_0);
         delay_1ms(1000);
     }
 }

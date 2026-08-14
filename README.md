@@ -25,3 +25,7 @@ To support other GD32F10x parts, you need:
 - change `-DGD32F10X_MD` C_DEFS in 'Makefile' to `MD`, `HD`, `XD` or `CL` according to your MCU.
 - change the 'TARGET' in 'Makefile'
 
+# 需要安装的软件
+apt install openocd
+apt install gdb-multiarch
+

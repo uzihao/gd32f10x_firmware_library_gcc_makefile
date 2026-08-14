@@ -13,6 +13,9 @@ DEBUG = 1
 # optimization for size
 OPT = -Os
 
+# Set to 0 to build the original bare-metal application.
+FREERTOS_ENABLED ?= 1
+
 
 #######################################
 # paths
@@ -52,6 +55,18 @@ Firmware/GD32F10x_standard_peripheral/Source/gd32f10x_crc.c \
 User/systick.c \
 User/gd32f10x_it.c \
 User/main.c
+
+ifeq ($(FREERTOS_ENABLED),1)
+C_SOURCES += \
+Utilities/Third_Party/FreeRTOS-Kernel/tasks.c \
+Utilities/Third_Party/FreeRTOS-Kernel/queue.c \
+Utilities/Third_Party/FreeRTOS-Kernel/list.c \
+Utilities/Third_Party/FreeRTOS-Kernel/timers.c \
+Utilities/Third_Party/FreeRTOS-Kernel/event_groups.c \
+Utilities/Third_Party/FreeRTOS-Kernel/stream_buffer.c \
+Utilities/Third_Party/FreeRTOS-Kernel/portable/GCC/ARM_CM3/port.c \
+Utilities/Third_Party/FreeRTOS-Kernel/portable/MemMang/heap_4.c
+endif
 
 
 # ASM sources
@@ -104,6 +119,10 @@ C_DEFS =  \
 -DUSE_STDPERIPH_DRIVER \
 -DGD32F10X_HD
 
+ifeq ($(FREERTOS_ENABLED),1)
+C_DEFS += -DUSE_FREERTOS
+endif
+
 
 # AS includes
 AS_INCLUDES = 
@@ -114,12 +133,15 @@ C_INCLUDES =  \
 -IFirmware/CMSIS/GD/GD32F10x/Include \
 -IFirmware/GD32F10x_standard_peripheral/Include \
 -ITemplate \
--IUser
+-IUser \
+-IUser/config \
+-IUtilities/Third_Party/FreeRTOS-Kernel/include \
+-IUtilities/Third_Party/FreeRTOS-Kernel/portable/GCC/ARM_CM3
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -Wno-unused-function -fdata-sections -ffunction-sections
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2

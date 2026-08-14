@@ -38,6 +38,8 @@ OF SUCH DAMAGE.
 #include "gd32f10x.h"
 #include "systick.h"
 
+#ifndef USE_FREERTOS
+
 volatile static uint32_t delay;
 
 /*!
@@ -84,3 +86,5 @@ void delay_decrement(void)
         delay--;
     }
 }
+
+#endif /* USE_FREERTOS */

@@ -39,6 +39,14 @@ OF SUCH DAMAGE.
 #include "main.h"
 #include "systick.h"
 
+#ifdef USE_FREERTOS
+#include "FreeRTOS.h"
+
+extern void vPortSVCHandler(void) __attribute__((naked));
+extern void xPortPendSVHandler(void) __attribute__((naked));
+extern void xPortSysTickHandler(void);
+#endif
+
 /*!
     \brief      this function handles NMI exception
     \param[in]  none
@@ -107,8 +115,14 @@ void UsageFault_Handler(void)
     \param[out] none
     \retval     none
 */
+#ifdef USE_FREERTOS
+void SVC_Handler(void) __attribute__((naked));
+#endif
 void SVC_Handler(void)
 {
+#ifdef USE_FREERTOS
+    __asm volatile ("b vPortSVCHandler");
+#endif
 }
 
 /*!
@@ -127,8 +141,14 @@ void DebugMon_Handler(void)
     \param[out] none
     \retval     none
 */
+#ifdef USE_FREERTOS
+void PendSV_Handler(void) __attribute__((naked));
+#endif
 void PendSV_Handler(void)
 {
+#ifdef USE_FREERTOS
+    __asm volatile ("b xPortPendSVHandler");
+#endif
 }
 
 /*!
@@ -139,5 +159,9 @@ void PendSV_Handler(void)
 */
 void SysTick_Handler(void)
 {
+#ifdef USE_FREERTOS
+    xPortSysTickHandler();
+#else
     delay_decrement();
+#endif
 }

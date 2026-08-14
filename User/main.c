@@ -36,6 +36,11 @@ OF SUCH DAMAGE.
 #include "systick.h"
 #include <stdio.h>
 
+#ifdef USE_FREERTOS
+#include "FreeRTOS.h"
+#include "task.h"
+#endif
+
 #define DEBUG_USART            USART0
 #define DEBUG_USART_GPIO       GPIOA
 #define DEBUG_USART_TX_PIN     GPIO_PIN_9
@@ -57,6 +62,32 @@ static void debug_usart_init(void)
     usart_transmit_config(DEBUG_USART, USART_TRANSMIT_ENABLE);
     usart_enable(DEBUG_USART);
 }
+
+#ifdef USE_FREERTOS
+static void blink_task(void *parameter)
+{
+    (void)parameter;
+
+    for(;;) {
+        gpio_bit_set(GPIOA, GPIO_PIN_0);
+        printf("freertos heartbeat\r\n");
+        vTaskDelay(pdMS_TO_TICKS(1000U));
+        gpio_bit_reset(GPIOA, GPIO_PIN_0);
+        vTaskDelay(pdMS_TO_TICKS(1000U));
+    }
+}
+
+/* Stack overflow hook */
+void vApplicationStackOverflowHook(TaskHandle_t task, char *task_name)
+{
+    (void)task;
+    (void)task_name;
+
+    taskDISABLE_INTERRUPTS();
+    while(1) {
+    }
+}
+#endif
 
 /* Redirect printf() output to USART0 (PA9). */
 int _write(int file, char *ptr, int len)
@@ -80,7 +111,9 @@ int _write(int file, char *ptr, int len)
 */
 int main(void)
 {
+#ifndef USE_FREERTOS
     systick_config();
+#endif
     debug_usart_init();
     printf("GD32F103 booted: USART0 PA9, 115200 8N1\r\n");
 
@@ -90,11 +123,23 @@ int main(void)
     gpio_init(GPIOA, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_0);
     gpio_bit_reset(GPIOA, GPIO_PIN_0);
 
+#ifdef USE_FREERTOS
+    if(pdPASS != xTaskCreate(blink_task, "blink", configMINIMAL_STACK_SIZE,
+                             NULL, tskIDLE_PRIORITY + 1U, NULL)) {
+        while(1) {
+        }
+    }
+
+    vTaskStartScheduler();
+    while(1) {
+    }
+#else
     while(1){
         gpio_bit_set(GPIOA, GPIO_PIN_0);
-        printf("heartbeat\r\n");
+        printf("bare heartbeat\r\n");
         delay_1ms(1000);
         gpio_bit_reset(GPIOA, GPIO_PIN_0);
         delay_1ms(1000);
     }
+#endif
 }

@@ -39,6 +39,22 @@ make GCC_PATH=/opt/arm-gnu-toolchain-15.3.rel1-x86_64-arm-none-eabi/bin
 
 The generated firmware is placed in `build/` as `.elf`, `.hex`, and `.bin`.
 
+### Application layout
+
+The application-specific code is organized below `User/` so new peripherals
+and RTOS tasks do not accumulate in `main.c`:
+
+- `app/`: application startup and task registration.
+- `bsp/`: board wiring and reusable board-level peripherals (LED and debug UART).
+- `platform/gd32f10x/`: GD32F10x-specific startup support, SysTick, and exception handlers.
+- `chips/`: external peripheral-chip drivers, such as W25Q flash, sensors, and displays.
+- `config/`: build-time configuration, including `FreeRTOSConfig.h`.
+- `tasks/`: individual RTOS task modules. Add each new task here and register it from `app/app_startup.c`.
+
+`User/main.c` is intentionally limited to the C entry point. Board pin mappings
+are centralized in `User/bsp/board.c`; the current board uses LED PA0 and debug
+USART0 TX on PA9.
+
 ### FreeRTOS configuration
 
 `User/config/FreeRTOSConfig.h` is configured for this Cortex-M3 target:
@@ -56,8 +72,9 @@ The generated firmware is placed in `build/` as `.elf`, `.hex`, and `.bin`.
 ### SysTick and exception handlers
 
 FreeRTOS owns the `SVC`, `PendSV`, and `SysTick` exceptions. In FreeRTOS mode,
-`User/gd32f10x_it.c` forwards these handlers to the Cortex-M3 FreeRTOS port and
-`User/systick.c` does not configure SysTick. Application tasks must use
+`User/platform/gd32f10x/gd32f10x_it.c` forwards these handlers to the Cortex-M3
+FreeRTOS port and `User/platform/gd32f10x/systick.c` does not configure SysTick.
+Application tasks must use
 `vTaskDelay()` / `pdMS_TO_TICKS()` instead of the bare-metal `delay_1ms()`.
 
 The same source files can also be used without FreeRTOS. Build the original

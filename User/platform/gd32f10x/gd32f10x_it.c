@@ -36,7 +36,6 @@ OF SUCH DAMAGE.
 */
 
 #include "gd32f10x_it.h"
-#include "main.h"
 #include "systick.h"
 
 #ifdef USE_FREERTOS

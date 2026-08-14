@@ -52,8 +52,12 @@ Firmware/GD32F10x_standard_peripheral/Source/gd32f10x_i2c.c \
 Firmware/GD32F10x_standard_peripheral/Source/gd32f10x_rtc.c \
 Firmware/GD32F10x_standard_peripheral/Source/gd32f10x_sdio.c \
 Firmware/GD32F10x_standard_peripheral/Source/gd32f10x_crc.c \
-User/systick.c \
-User/gd32f10x_it.c \
+User/platform/gd32f10x/systick.c \
+User/platform/gd32f10x/gd32f10x_it.c \
+User/bsp/board.c \
+User/bsp/debug_uart.c \
+User/tasks/blink_task.c \
+User/app/app_startup.c \
 User/main.c
 
 ifeq ($(FREERTOS_ENABLED),1)
@@ -135,6 +139,10 @@ C_INCLUDES =  \
 -ITemplate \
 -IUser \
 -IUser/config \
+-IUser/app \
+-IUser/bsp \
+-IUser/platform/gd32f10x \
+-IUser/tasks \
 -IUtilities/Third_Party/FreeRTOS-Kernel/include \
 -IUtilities/Third_Party/FreeRTOS-Kernel/portable/GCC/ARM_CM3
 
